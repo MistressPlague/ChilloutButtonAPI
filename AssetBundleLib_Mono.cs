@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Libraries
 {
-    public class AssetBundleLib
+    internal class AssetBundleLib
     {
         /// <summary>
         /// The Loaded AssetBundle, Null By Default
