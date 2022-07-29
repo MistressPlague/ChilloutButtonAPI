@@ -19,7 +19,7 @@ namespace ChilloutButtonAPI.UI
 
         public SubMenu AddSubMenu(string Title, string ButtonText = null)
         {
-            ButtonText = ButtonText ?? Title;
+            ButtonText ??= Title;
 
             var menu = new SubMenu
             {
