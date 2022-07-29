@@ -53,6 +53,7 @@ namespace ChilloutButtonAPI
                     OurUIParent.transform.localScale = new Vector3(0.0007f, 0.001f, 0.001f);
 
                     OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP)").gameObject.SetActive(false);
+                    OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP) Title").GetComponent<TextMeshProUGUI>().text = "Mod UI";
 
                     OurUIParent.transform.Find("Scroll View/Viewport/Content/Slider").gameObject.AddComponent<SliderTextUpdater>();
                     OurUIParent.transform.Find("Tooltip").gameObject.AddComponent<TooltipHandler>();
