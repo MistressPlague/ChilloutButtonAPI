@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
@@ -74,18 +75,18 @@ namespace ChilloutButtonAPI
 
                     menu.AddButton("Test Button", "Test Button", () =>
                     {
-                        MelonLogger.Msg($"Button Clicked!");
+                        MelonLogger.Msg("Button Clicked!");
                     });
 
                     menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
                     {
                         MelonLogger.Msg($"Toggle Clicked! -> {v}");
-                    }, false);
+                    }, true);
 
                     menu.AddSlider("Test Slider", "Test Slider", (v) =>
                     {
                         MelonLogger.Msg($"Slider Adjusted! -> {v}");
-                    }, 0f, 0f, 1f);
+                    }, 0.5f, 0f, 1f);
 
                     menu.AddLabel("Test Label", "Test Label");
                 };
@@ -93,9 +94,22 @@ namespace ChilloutButtonAPI
                 OnInit?.Invoke();
             }
 
-            if (OurUIParent != null && OurUIParent.activeSelf != __0)
+            if (SubMenu.AllSubMenus.Any(o => o.LastState))
             {
-                OurUIParent.SetActive(__0);
+                foreach (var menu in SubMenu.AllSubMenus)
+                {
+                    if (menu.gameObject.activeSelf != __0)
+                    {
+                        menu.SetActive(__0 && menu.LastState, true);
+                    }
+                }
+            }
+            else
+            {
+                if (MainPage.gameObject.activeSelf != __0)
+                {
+                    MainPage.SetActive(__0);
+                }
             }
         }
 

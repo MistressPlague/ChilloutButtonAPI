@@ -81,9 +81,9 @@ namespace ChilloutButtonAPI
             return text;
         }
 
-        public static void DestroyChildren(this Transform transform, Func<Transform, bool> exclude)
+        public static void DestroyChildren(this Transform transform, Func<Transform, bool> exclude, bool DirectChildrenOnly = false)
         {
-            foreach (var child in transform.GetComponentsInChildren<Transform>(true).Where(o => o != transform))
+            foreach (var child in (DirectChildrenOnly ? transform.GetChildren() : transform.GetComponentsInChildren<Transform>(true)).Where(o => o != transform))
             {
                 if (child != null)
                 {
@@ -95,9 +95,9 @@ namespace ChilloutButtonAPI
             }
         }
 
-        public static void DestroyChildren(this Transform transform)
+        public static void DestroyChildren(this Transform transform, bool DirectChildrenOnly = false)
         {
-            transform.DestroyChildren(null);
+            transform.DestroyChildren(null, DirectChildrenOnly);
         }
 
         public static Vector3 SetX(this Vector3 vector, float x)
