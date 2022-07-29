@@ -157,7 +157,7 @@ namespace ChilloutButtonAPI
             private GameObject OffsetParent;
             void Start()
             {
-                TextComp = transform.GetComponentInChildren<TextMeshProUGUI>();
+                TextComp = transform.GetComponentInChildren<TextMeshProUGUI>(true);
                 OffsetParent = transform.Find("Offset Parent").gameObject;
             }
 
@@ -173,11 +173,9 @@ namespace ChilloutButtonAPI
 
                     if (Physics.Raycast(ray, out var hit)) // idk how the fuck to use this method
                     {
-                        MelonLogger.Msg($"Hit: {hit.transform.GetPath()}");
+                        var store = hit.transform.GetComponent<ToolTipStore>();
 
-                        var store = hit.transform.GetComponent<ToolTipStore>() ?? hit.transform.GetComponentInParent<ToolTipStore>();
-
-                        if (!string.IsNullOrEmpty(store?.Tooltip))
+                        if (store != null)
                         {
                             TextComp.text = store.Tooltip;
                             OffsetParent.SetActive(true);
