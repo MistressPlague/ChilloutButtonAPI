@@ -173,7 +173,9 @@ namespace ChilloutButtonAPI
 
                     if (Physics.Raycast(ray, out var hit)) // idk how the fuck to use this method
                     {
-                        var store = hit.transform.GetComponent<ToolTipStore>();
+                        MelonLogger.Msg($"Hit: {hit.transform.GetPath()}");
+
+                        var store = hit.transform.GetComponent<ToolTipStore>() ?? hit.transform.GetComponentInParent<ToolTipStore>();
 
                         if (!string.IsNullOrEmpty(store?.Tooltip))
                         {
