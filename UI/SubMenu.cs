@@ -71,7 +71,7 @@ namespace ChilloutButtonAPI.UI
             return CopiedButton;
         }
 
-        public GameObject AddToggle(string Text, string Tooltip, Action<bool> OnToggle)
+        public GameObject AddToggle(string Text, string Tooltip, Action<bool> OnToggle, bool DefaultState)
         {
             var CopiedToggle = Object.Instantiate(PageContent.Find("Toggle").gameObject, PageContent);
 
@@ -84,12 +84,14 @@ namespace ChilloutButtonAPI.UI
                 OnToggle?.Invoke(v);
             });
 
+            CopiedToggle.GetComponent<Toggle>().isOn = DefaultState;
+
             CopiedToggle.SetActive(true);
 
             return CopiedToggle;
         }
 
-        public GameObject AddSlider(string Text, string Tooltip, Action<float> OnSlide)
+        public GameObject AddSlider(string Text, string Tooltip, Action<float> OnSlide, float DefaultValue, float MinValue = 0f, float MaxValue = 1f)
         {
             var CopiedSlider = Object.Instantiate(PageContent.Find("Slider").gameObject, PageContent);
 
@@ -101,6 +103,10 @@ namespace ChilloutButtonAPI.UI
             {
                 OnSlide?.Invoke(v);
             });
+
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().minValue = MinValue;
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().minValue = MaxValue;
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().value = DefaultValue;
 
             CopiedSlider.SetActive(true);
 

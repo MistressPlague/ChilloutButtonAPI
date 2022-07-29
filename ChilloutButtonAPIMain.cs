@@ -80,12 +80,12 @@ namespace ChilloutButtonAPI
                     menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
                     {
                         MelonLogger.Msg($"Toggle Clicked! -> {v}");
-                    });
+                    }, false);
 
                     menu.AddSlider("Test Slider", "Test Slider", (v) =>
                     {
                         MelonLogger.Msg($"Slider Adjusted! -> {v}");
-                    });
+                    }, 0f, 0f, 1f);
 
                     menu.AddLabel("Test Label", "Test Label");
                 };
