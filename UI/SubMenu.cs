@@ -98,13 +98,13 @@ namespace ChilloutButtonAPI.UI
             CopiedToggle.transform.Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = Text;
             CopiedToggle.GetOrAddComponent<ChilloutButtonAPIMain.ToolTipStore>().Tooltip = Tooltip;
 
+            CopiedToggle.GetComponent<Toggle>().isOn = DefaultState;
+
             CopiedToggle.GetComponent<Toggle>().onValueChanged = new Toggle.ToggleEvent();
             CopiedToggle.GetComponent<Toggle>().onValueChanged.AddListener(v =>
             {
                 OnToggle?.Invoke(v);
             });
-
-            CopiedToggle.GetComponent<Toggle>().isOn = DefaultState;
 
             CopiedToggle.SetActive(true);
 
@@ -118,15 +118,15 @@ namespace ChilloutButtonAPI.UI
             CopiedSlider.transform.Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = Text;
             CopiedSlider.transform.Find("Slider").GetOrAddComponent<ChilloutButtonAPIMain.ToolTipStore>().Tooltip = Tooltip;
 
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().minValue = MinValue;
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().maxValue = MaxValue;
+            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().value = DefaultValue;
+
             CopiedSlider.transform.Find("Slider").GetComponent<Slider>().onValueChanged = new Slider.SliderEvent();
             CopiedSlider.transform.Find("Slider").GetComponent<Slider>().onValueChanged.AddListener(v =>
             {
                 OnSlide?.Invoke(v);
             });
-
-            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().minValue = MinValue;
-            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().maxValue = MaxValue;
-            CopiedSlider.transform.Find("Slider").GetComponent<Slider>().value = DefaultValue;
 
             CopiedSlider.SetActive(true);
 
