@@ -36,85 +36,92 @@ namespace ChilloutButtonAPI
 
         private static void OnQMStateChange(bool __0)
         {
-            if (!HasInit)
+            MelonCoroutines.Start(RunMe());
+
+            IEnumerator RunMe()
             {
-                if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle("ChilloutButtonAPI.universal ui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
+                yield return new WaitForSeconds(0.2f);
+
+                if (!HasInit)
                 {
-                    var obj = Bundle.Load<GameObject>("Universal UI.prefab");
-
-                    var QM = GameObject.Find("Cohtml").transform.Find("QuickMenu");
-
-                    OurUIParent = Object.Instantiate(obj);
-
-                    OurUIParent.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
-                    OurUIParent.transform.SetParent(QM);
-
-                    OurUIParent.transform.localPosition = new Vector3(0.65f, 0.062f, 0f);
-                    OurUIParent.transform.localScale = new Vector3(0.0007f, 0.001f, 0.001f);
-
-                    OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP)").gameObject.SetActive(false);
-                    OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP) Title").GetComponent<TextMeshProUGUI>().text = "Mod UI";
-
-                    OurUIParent.transform.Find("Scroll View/Viewport/Content/Slider").gameObject.AddComponent<SliderTextUpdater>();
-                    OurUIParent.transform.Find("Tooltip").gameObject.AddComponent<TooltipHandler>();
-
-                    MainPage = new SubMenu
+                    if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle("ChilloutButtonAPI.universal ui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
                     {
-                        gameObject = OurUIParent
+                        var obj = Bundle.Load<GameObject>("Universal UI.prefab");
+
+                        var QM = GameObject.Find("Cohtml").transform.Find("QuickMenu");
+
+                        OurUIParent = Object.Instantiate(obj);
+
+                        OurUIParent.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+                        OurUIParent.transform.SetParent(QM);
+
+                        OurUIParent.transform.localPosition = new Vector3(0.65f, 0.062f, 0f);
+                        OurUIParent.transform.localScale = new Vector3(0.0007f, 0.001f, 0.001f);
+
+                        OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP)").gameObject.SetActive(false);
+                        OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP) Title").GetComponent<TextMeshProUGUI>().text = "Mod UI";
+
+                        OurUIParent.transform.Find("Scroll View/Viewport/Content/Slider").gameObject.AddComponent<SliderTextUpdater>();
+                        OurUIParent.transform.Find("Tooltip").gameObject.AddComponent<TooltipHandler>();
+
+                        MainPage = new SubMenu
+                        {
+                            gameObject = OurUIParent
+                        };
+                    }
+                    else
+                    {
+                        MelonLogger.Error($"Failed Loading Bundle: {Bundle.error}");
+                    }
+
+                    HasInit = true;
+
+                    OnInit += () =>
+                    {
+                        var menu = MainPage.AddSubMenu("Test SubMenu");
+
+                        menu.AddButton("Test Button", "Test Button", () =>
+                        {
+                            MelonLogger.Msg("Button Clicked!");
+
+                            CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
+
+                            ViewManager.Instance.openMenuKeyboard("");
+                        });
+
+                        menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
+                        {
+                            MelonLogger.Msg($"Toggle Clicked! -> {v}");
+                        }, true);
+
+                        menu.AddSlider("Test Slider", "Test Slider", (v) =>
+                        {
+                            MelonLogger.Msg($"Slider Adjusted! -> {v}");
+                        }, 0.5f, 0f, 1f);
+
+                        menu.AddLabel("Test Label", "Test Label");
                     };
+
+                    OnInit?.Invoke();
+                }
+
+                if (SubMenu.AllSubMenus.Any(o => o.LastState))
+                {
+                    foreach (var menu in SubMenu.AllSubMenus)
+                    {
+                        if (menu.gameObject.activeSelf != __0)
+                        {
+                            menu.SetActive(__0 && menu.LastState, true);
+                        }
+                    }
                 }
                 else
                 {
-                    MelonLogger.Error($"Failed Loading Bundle: {Bundle.error}");
-                }
-
-                HasInit = true;
-
-                OnInit += () =>
-                {
-                    var menu = MainPage.AddSubMenu("Test SubMenu");
-
-                    menu.AddButton("Test Button", "Test Button", () =>
+                    if (MainPage.gameObject.activeSelf != __0)
                     {
-                        MelonLogger.Msg("Button Clicked!");
-
-                        CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
-
-                        ViewManager.Instance.openMenuKeyboard("");
-                    });
-
-                    menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
-                    {
-                        MelonLogger.Msg($"Toggle Clicked! -> {v}");
-                    }, true);
-
-                    menu.AddSlider("Test Slider", "Test Slider", (v) =>
-                    {
-                        MelonLogger.Msg($"Slider Adjusted! -> {v}");
-                    }, 0.5f, 0f, 1f);
-
-                    menu.AddLabel("Test Label", "Test Label");
-                };
-
-                OnInit?.Invoke();
-            }
-
-            if (SubMenu.AllSubMenus.Any(o => o.LastState))
-            {
-                foreach (var menu in SubMenu.AllSubMenus)
-                {
-                    if (menu.gameObject.activeSelf != __0)
-                    {
-                        menu.SetActive(__0 && menu.LastState, true);
+                        MainPage.SetActive(__0);
                     }
-                }
-            }
-            else
-            {
-                if (MainPage.gameObject.activeSelf != __0)
-                {
-                    MainPage.SetActive(__0);
                 }
             }
         }
