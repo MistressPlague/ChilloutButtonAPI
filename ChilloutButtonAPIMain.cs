@@ -138,9 +138,13 @@ namespace ChilloutButtonAPI
 
                 MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"{__instance.userName} Joined" : "Local Player Init");
 
+                OnPlayerJoin?.Invoke(__instance);
+
                 yield break;
             }
         }
+
+        public static event Action<PlayerDescriptor> OnPlayerJoin;
 
         internal class SliderTextUpdater : MonoBehaviour
         {
