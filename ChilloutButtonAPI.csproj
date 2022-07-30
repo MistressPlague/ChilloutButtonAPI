@@ -44,6 +44,18 @@
       <HintPath>D:\Games\SteamLibrary\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="cohtml.Net">
+      <HintPath>..\..\Games\SteamLibrary\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\cohtml.Net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Cohtml.RenderingBackend">
+      <HintPath>..\..\Games\SteamLibrary\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Cohtml.RenderingBackend.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Cohtml.Runtime">
+      <HintPath>..\..\Games\SteamLibrary\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Cohtml.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\Games\SteamLibrary\steamapps\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
       <Private>False</Private>
@@ -455,6 +467,8 @@
   <ItemGroup>
     <EmbeddedResource Include="universal ui.asset" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="markyui.asset" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

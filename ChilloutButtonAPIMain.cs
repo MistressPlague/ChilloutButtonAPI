@@ -3,9 +3,12 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
 using ChilloutButtonAPI.UI;
+using cohtml;
+using cohtml.Net;
 using HarmonyLib;
 using Libraries;
 using MelonLoader;
@@ -29,10 +32,19 @@ namespace ChilloutButtonAPI
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
 
             HarmonyInstance.Patch(typeof(CVR_MenuManager).GetMethod(nameof(CVR_MenuManager.ToggleQuickMenu), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnQMStateChange), BindingFlags.NonPublic | BindingFlags.Static))); // Patch Method Setting Bool For QM Status; Use For Our UI To Sync
+
+            HarmonyInstance.Patch(typeof(ViewManager).GetMethod(nameof(ViewManager.OnUserDetailsRequestReady), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(UserRequested), BindingFlags.NonPublic | BindingFlags.Static)));
         }
 
         private static GameObject OurUIParent;
         public static SubMenu MainPage;
+        private static string LastSelectedGUID = "";
+
+        private static void UserRequested()
+        {
+            MelonLogger.Msg(Users.Requested.UserId);
+            LastSelectedGUID = Users.Requested.UserId;
+        }
 
         private static void OnQMStateChange(bool __0)
         {
@@ -40,10 +52,35 @@ namespace ChilloutButtonAPI
 
             IEnumerator RunMe()
             {
-                yield return new WaitForSeconds(0.2f);
-
                 if (!HasInit)
                 {
+                    if (new AssetBundleLib() is var MarkyBundle && MarkyBundle.LoadBundle("ChilloutButtonAPI.markyui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
+                    {
+                        var obj = MarkyBundle.Load<GameObject>("MarkyUI.prefab");
+
+                        var BM = GameObject.Find("Cohtml").transform.Find("CohtmlWorldView");
+
+                        var MarkyUI = Object.Instantiate(obj);
+
+                        MarkyUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+                        MarkyUI.transform.SetParent(BM);
+
+                        MarkyUI.transform.Find("Button").GetComponentInChildren<TextMeshProUGUI>(true).text = "Edit Note";
+                        MarkyUI.transform.Find("Button").GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
+                        MarkyUI.transform.Find("Button").GetComponent<Button>().onClick.AddListener(() =>
+                        {
+                            MelonLogger.Msg(LastSelectedGUID);
+                        });
+
+                        MarkyUI.transform.localScale = new Vector3(0.001f, 0.002f, 0.002f);
+                        MarkyUI.transform.localPosition = new Vector3(-0.59f, - 0.268f, 0);
+                    }
+                    else
+                    {
+                        MelonLogger.Error($"Failed Loading Bundle: {MarkyBundle.error}");
+                    }
+
                     if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle("ChilloutButtonAPI.universal ui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
                     {
                         var obj = Bundle.Load<GameObject>("Universal UI.prefab");
@@ -85,9 +122,9 @@ namespace ChilloutButtonAPI
                         {
                             MelonLogger.Msg("Button Clicked!");
 
-                            CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
+                            //CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
 
-                            ViewManager.Instance.openMenuKeyboard("");
+                            //ViewManager.Instance.openMenuKeyboard("");
                         });
 
                         menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
@@ -105,6 +142,8 @@ namespace ChilloutButtonAPI
 
                     OnInit?.Invoke();
                 }
+
+                yield return new WaitForSeconds(0.2f);
 
                 if (SubMenu.AllSubMenus.Any(o => o.LastState))
                 {
@@ -131,7 +170,7 @@ namespace ChilloutButtonAPI
         private static void OnPlayerJoined(PlayerDescriptor __instance)
         {
             MelonCoroutines.Start(RunMe());
-
+            
             IEnumerator RunMe()
             {
                 yield return new WaitForSeconds(1f);
