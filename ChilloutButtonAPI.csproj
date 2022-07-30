@@ -467,8 +467,5 @@
   <ItemGroup>
     <EmbeddedResource Include="universal ui.asset" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="markyui.asset" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
