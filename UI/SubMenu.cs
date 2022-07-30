@@ -64,9 +64,9 @@ namespace ChilloutButtonAPI.UI
                 SetActive(true);
             });
 
-            ChilloutButtonAPIMain.MainPage.AddButton(ButtonText, $"Enter The {Title} SubMenu.", () =>
-            {
-                ChilloutButtonAPIMain.MainPage.SetActive(false);
+            AddButton(ButtonText, $"Enter The {Title} SubMenu.", () =>
+            { 
+                SetActive(false);
                 menu.SetActive(true);
             });
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.UI;
 using ChilloutButtonAPI.UI;
 using HarmonyLib;
 using Libraries;
@@ -77,6 +78,10 @@ namespace ChilloutButtonAPI
                     menu.AddButton("Test Button", "Test Button", () =>
                     {
                         MelonLogger.Msg("Button Clicked!");
+
+                        CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
+
+                        ViewManager.Instance.openMenuKeyboard("");
                     });
 
                     menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
