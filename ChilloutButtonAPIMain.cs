@@ -32,19 +32,10 @@ namespace ChilloutButtonAPI
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
 
             HarmonyInstance.Patch(typeof(CVR_MenuManager).GetMethod(nameof(CVR_MenuManager.ToggleQuickMenu), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnQMStateChange), BindingFlags.NonPublic | BindingFlags.Static))); // Patch Method Setting Bool For QM Status; Use For Our UI To Sync
-
-            HarmonyInstance.Patch(typeof(ViewManager).GetMethod(nameof(ViewManager.OnUserDetailsRequestReady), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(UserRequested), BindingFlags.NonPublic | BindingFlags.Static)));
         }
 
         private static GameObject OurUIParent;
         public static SubMenu MainPage;
-        private static string LastSelectedGUID = "";
-
-        private static void UserRequested()
-        {
-            MelonLogger.Msg(Users.Requested.UserId);
-            LastSelectedGUID = Users.Requested.UserId;
-        }
 
         private static void OnQMStateChange(bool __0)
         {
@@ -54,33 +45,6 @@ namespace ChilloutButtonAPI
             {
                 if (!HasInit)
                 {
-                    if (new AssetBundleLib() is var MarkyBundle && MarkyBundle.LoadBundle("ChilloutButtonAPI.markyui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
-                    {
-                        var obj = MarkyBundle.Load<GameObject>("MarkyUI.prefab");
-
-                        var BM = GameObject.Find("Cohtml").transform.Find("CohtmlWorldView");
-
-                        var MarkyUI = Object.Instantiate(obj);
-
-                        MarkyUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
-                        MarkyUI.transform.SetParent(BM);
-
-                        MarkyUI.transform.Find("Button").GetComponentInChildren<TextMeshProUGUI>(true).text = "Edit Note";
-                        MarkyUI.transform.Find("Button").GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-                        MarkyUI.transform.Find("Button").GetComponent<Button>().onClick.AddListener(() =>
-                        {
-                            MelonLogger.Msg(LastSelectedGUID);
-                        });
-
-                        MarkyUI.transform.localScale = new Vector3(0.001f, 0.002f, 0.002f);
-                        MarkyUI.transform.localPosition = new Vector3(-0.59f, - 0.268f, 0);
-                    }
-                    else
-                    {
-                        MelonLogger.Error($"Failed Loading Bundle: {MarkyBundle.error}");
-                    }
-
                     if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle("ChilloutButtonAPI.universal ui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
                     {
                         var obj = Bundle.Load<GameObject>("Universal UI.prefab");
@@ -106,6 +70,8 @@ namespace ChilloutButtonAPI
                         {
                             gameObject = OurUIParent
                         };
+
+                        
                     }
                     else
                     {
