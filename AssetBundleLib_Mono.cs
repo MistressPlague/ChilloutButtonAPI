@@ -19,14 +19,6 @@ namespace Libraries
 
         public string error = "";
 
-        public AssetBundleLib(string resource = null)
-        {
-            if (!string.IsNullOrEmpty(resource))
-            {
-                LoadBundle(resource);
-            }
-        }
-
         /// <summary>
         /// Loads An Asset Bundle For Using Data Such As Sprites
         /// </summary>
@@ -55,32 +47,9 @@ namespace Libraries
 
                     stream.CopyTo(memStream);
 
-                    if (memStream != null && memStream.Length > 0)
+                    if (memStream.Length > 0)
                     {
-                        var assetBundle = AssetBundle.LoadFromMemory(memStream.ToArray());
-
-                        if (assetBundle != null)
-                        {
-                            assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-
-                            bundle = assetBundle;
-
-                            HasLoadedABundle = true;
-
-                            return true;
-                        }
-
-                        var resourcename = resource.Replace(resource.Substring(resource.LastIndexOf(".")), "").Substring(resource.LastIndexOf("."));
-
-                        assetBundle = AssetBundle.GetAllLoadedAssetBundles().First(o => o.name == resourcename);
-
-                        assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-
-                        bundle = assetBundle;
-
-                        HasLoadedABundle = true;
-
-                        return true;
+                        return LoadBundle(memStream.ToArray());
                     }
 
                     error = "Null memStream!";
@@ -90,6 +59,14 @@ namespace Libraries
                     error = "Null Stream!";
                 }
 
+                var resourcename = resource.Replace(resource.Substring(resource.LastIndexOf(".")), "").Substring(resource.LastIndexOf("."));
+
+                var assetBundle = AssetBundle.GetAllLoadedAssetBundles().First(o => o.name == resourcename);
+
+                assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+
+                bundle = assetBundle;
+
                 return false;
             }
             catch (Exception ex)
@@ -97,6 +74,44 @@ namespace Libraries
                 error = ex.ToString();
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Loads An Asset Bundle For Using Data Such As Sprites
+        /// </summary>
+        /// <param name="resource">The byte[] Of The Embedded Resource File - Example: Properties.Resources.plaguelogo.asset</param>
+        /// <returns>True If Successful</returns>
+        public bool LoadBundle(byte[] resource)
+        {
+            if (HasLoadedABundle)
+            {
+                return true;
+            }
+
+            try
+            {
+                var assetBundle = AssetBundle.LoadFromMemory(resource);
+
+                if (assetBundle != null)
+                {
+                    assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+
+                    bundle = assetBundle;
+
+                    HasLoadedABundle = true;
+
+                    return true;
+                }
+
+                HasLoadedABundle = true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.ToString();
+                return false;
+            }
+
+            return false;
         }
 
         /// <summary>
