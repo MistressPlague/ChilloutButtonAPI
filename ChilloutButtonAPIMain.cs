@@ -18,7 +18,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Object = UnityEngine.Object;
 
-[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.4", "Plague")]
+[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.5", "Plague")]
 [assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 
 namespace ChilloutButtonAPI
@@ -32,8 +32,6 @@ namespace ChilloutButtonAPI
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
 
             HarmonyInstance.Patch(typeof(CVR_MenuManager).GetMethod(nameof(CVR_MenuManager.ToggleQuickMenu), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnQMStateChange), BindingFlags.NonPublic | BindingFlags.Static))); // Patch Method Setting Bool For QM Status; Use For Our UI To Sync
-
-            Properties.Resources.universal_ui
         }
 
         private static GameObject OurUIParent;
@@ -47,7 +45,7 @@ namespace ChilloutButtonAPI
             {
                 if (!HasInit)
                 {
-                    if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle("ChilloutButtonAPI.universal ui.asset")) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
+                    if (new AssetBundleLib() is var Bundle && Bundle.LoadBundle(Properties.Resources.universal_ui)) // This If Also Checks If It Successfully Loaded As To Prevent Further Exceptions
                     {
                         var obj = Bundle.Load<GameObject>("Universal UI.prefab");
 
