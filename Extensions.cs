@@ -57,9 +57,23 @@ namespace ChilloutButtonAPI
             return comp;
         }
 
-        public static T[] GetAllInstancesOf<T>(bool includeInactive = false, Func<T, bool> Filter = null) where T : Behaviour
+        public static T[] GetAllInstancesOfCurrentScene<T>(bool includeInactive = false, Func<T, bool> Filter = null) where T : Behaviour
         {
             var AllRootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+
+            var GrabbedObjects = AllRootObjects.SelectMany(o => o.GetComponentsInChildren<T>(includeInactive)).ToArray();
+
+            if (Filter != null)
+            {
+                GrabbedObjects = GrabbedObjects.Where(Filter).ToArray();
+            }
+
+            return GrabbedObjects;
+        }
+
+        public static T[] GetAllInstancesOfAllScenes<T>(bool includeInactive = false, Func<T, bool> Filter = null) where T : Behaviour
+        {
+            var AllRootObjects = SceneManager.GetAllScenes().SelectMany(o => o.GetRootGameObjects());
 
             var GrabbedObjects = AllRootObjects.SelectMany(o => o.GetComponentsInChildren<T>(includeInactive)).ToArray();
 
