@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MelonLoader;
+using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -53,6 +55,20 @@ namespace ChilloutButtonAPI
             }
 
             return comp;
+        }
+
+        public static T[] GetAllInstancesOf<T>(bool includeInactive = false, Func<T, bool> Filter = null) where T : Behaviour
+        {
+            var AllRootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+
+            var GrabbedObjects = AllRootObjects.SelectMany(o => o.GetComponentsInChildren<T>(includeInactive)).ToArray();
+
+            if (Filter != null)
+            {
+                GrabbedObjects = GrabbedObjects.Where(Filter).ToArray();
+            }
+
+            return GrabbedObjects;
         }
 
         public static GameObject FindObject(this GameObject parent, string name)
