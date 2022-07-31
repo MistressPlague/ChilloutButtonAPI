@@ -8,18 +8,18 @@ using Object = UnityEngine.Object;
 
 namespace Libraries
 {
-    internal class AssetBundleLib
+    public class AssetBundleLib
     {
         /// <summary>
         /// The Loaded AssetBundle, Null By Default
         /// </summary>
-        internal AssetBundle bundle = null;
+        public AssetBundle bundle = null;
 
-        internal bool HasLoadedABundle = false;
+        public bool HasLoadedABundle = false;
 
-        internal string error = "";
+        public string error = "";
 
-        internal AssetBundleLib(string resource = null)
+        public AssetBundleLib(string resource = null)
         {
             if (!string.IsNullOrEmpty(resource))
             {
@@ -30,9 +30,9 @@ namespace Libraries
         /// <summary>
         /// Loads An Asset Bundle For Using Data Such As Sprites
         /// </summary>
-        /// <param name="resource">The Path To The Embedded Resource File - Example: VRCAntiCrash.Resources.plaguelogo.asset</param>
+        /// <param name="resource">The Path To The Embedded Resource File - Example: CVRButtonAPI.Resources.plaguelogo.asset</param>
         /// <returns>True If Successful</returns>
-        internal bool LoadBundle(string resource)
+        public bool LoadBundle(string resource)
         {
             if (HasLoadedABundle)
             {
@@ -104,7 +104,7 @@ namespace Libraries
         /// </summary>
         /// <param name="str">The Internal Name Of The Asset Inside The AssetBundle</param>
         /// <returns>The Asset You Searched For, Null If No AssetBundle Was Previously Loaded</returns>
-        internal T Load<T>(string str) where T : Object
+        public T Load<T>(string str) where T : Object
         {
             try
             {
