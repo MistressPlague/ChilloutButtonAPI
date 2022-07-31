@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace ChilloutButtonAPI
 {
-    internal static class Extensions
+    public static class Extensions
     {
         public static T GetOrAddComponent<T>(this GameObject obj) where T : Behaviour
         {
