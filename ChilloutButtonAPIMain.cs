@@ -18,7 +18,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Object = UnityEngine.Object;
 
-[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.6", "Plague")]
+[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.7", "Plague")]
 [assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 
 namespace ChilloutButtonAPI
