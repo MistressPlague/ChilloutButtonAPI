@@ -31,6 +31,8 @@ namespace ChilloutButtonAPI
         {
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
 
+            HarmonyInstance.Patch(typeof(PuppetMaster).GetMethod(nameof(PuppetMaster.AvatarInstantiated)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Pre), BindingFlags.NonPublic | BindingFlags.Static)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Post), BindingFlags.NonPublic | BindingFlags.Static)));
+
             HarmonyInstance.Patch(typeof(CVR_MenuManager).GetMethod(nameof(CVR_MenuManager.ToggleQuickMenu), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnQMStateChange), BindingFlags.NonPublic | BindingFlags.Static))); // Patch Method Setting Bool For QM Status; Use For Our UI To Sync
         }
 
@@ -143,13 +145,84 @@ namespace ChilloutButtonAPI
 
                 MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"{__instance.userName} Joined" : "Local Player Init");
 
+                __instance.gameObject.AddComponent<ObjectHandler>().OnDestroy_E += () =>
+                {
+                    OnPlayerLeft(__instance);
+                };
+
                 OnPlayerJoin?.Invoke(__instance);
 
                 yield break;
             }
         }
 
+        private static void OnPlayerLeft(PlayerDescriptor __instance)
+        {
+            MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"{__instance.userName} Left" : "Local Player Leave");
+
+            OnPlayerLeave?.Invoke(__instance);
+        }
+
+        private static bool OnAvatarInstantiated_Pre(ref PuppetMaster __instance)
+        {
+            return OnAvatarInstantiated_Pre_E?.Invoke(__instance, __instance.avatarObject) ?? true;
+        }
+
+        private static void OnAvatarInstantiated_Post(PuppetMaster __instance)
+        {
+            OnAvatarInstantiated_Post_E?.Invoke(__instance, __instance.avatarObject);
+        }
+
+        public static event Func<PuppetMaster, GameObject, bool> OnAvatarInstantiated_Pre_E;
+        public static event Action<PuppetMaster, GameObject> OnAvatarInstantiated_Post_E;
+
         public static event Action<PlayerDescriptor> OnPlayerJoin;
+        public static event Action<PlayerDescriptor> OnPlayerLeave;
+
+        public class PatchEventArgs : EventArgs
+        {
+            public bool DoNotRunPatchedMethod;
+
+            public PatchEventArgs(bool DoNotRunPatchedMethod)
+            {
+                this.DoNotRunPatchedMethod = DoNotRunPatchedMethod;
+            }
+        }
+
+        public class ObjectHandler : MonoBehaviour
+        {
+            public event Action OnStart_E;
+            public event Action OnUpdate_E;
+
+            public event Action OnEnable_E;
+            public event Action OnDisable_E;
+            public event Action OnDestroy_E;
+
+            void Start()
+            {
+                OnStart_E?.Invoke();
+            }
+
+            void Update()
+            {
+                OnUpdate_E?.Invoke();
+            }
+
+            void OnEnable()
+            {
+                OnEnable_E?.Invoke();
+            }
+
+            void OnDisable()
+            {
+                OnDisable_E?.Invoke();
+            }
+
+            void OnDestroy()
+            {
+                OnDestroy_E?.Invoke();
+            }
+        }
 
         internal class SliderTextUpdater : MonoBehaviour
         {
