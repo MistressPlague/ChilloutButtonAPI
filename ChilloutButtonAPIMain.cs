@@ -18,7 +18,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Object = UnityEngine.Object;
 
-[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.7", "Plague")]
+[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.8", "Plague")]
 [assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 
 namespace ChilloutButtonAPI
@@ -178,16 +178,6 @@ namespace ChilloutButtonAPI
 
         public static event Action<PlayerDescriptor> OnPlayerJoin;
         public static event Action<PlayerDescriptor> OnPlayerLeave;
-
-        public class PatchEventArgs : EventArgs
-        {
-            public bool DoNotRunPatchedMethod;
-
-            public PatchEventArgs(bool DoNotRunPatchedMethod)
-            {
-                this.DoNotRunPatchedMethod = DoNotRunPatchedMethod;
-            }
-        }
 
         public class ObjectHandler : MonoBehaviour
         {
