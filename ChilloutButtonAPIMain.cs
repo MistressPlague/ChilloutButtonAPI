@@ -1,34 +1,40 @@
-﻿using System;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ABI_RC.Core.InteractionSystem;
-using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
-using ABI_RC.Core.UI;
 using ChilloutButtonAPI.UI;
-using cohtml;
-using cohtml.Net;
-using HarmonyLib;
 using Libraries;
 using MelonLoader;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
+using AccessTools = HarmonyLib.AccessTools;
+using HarmonyMethod = HarmonyLib.HarmonyMethod;
 using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.8", "Plague")]
 [assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 
-namespace ChilloutButtonAPI
-{
+namespace ChilloutButtonAPI {
     public class ChilloutButtonAPIMain : MelonMod
     {
         public static event Action OnInit;
+        public static readonly Dictionary<string, Vector3> MenuPositions = new Dictionary<string, Vector3>() { { "Left", new Vector3(-.725f, 0.062f, 0f) }, { "Right", new Vector3(0.65f, 0.062f, 0f) } };
+        public static MelonPreferences_Entry menupos;
+        public static MelonPreferences_Entry menuscale;
+        public enum MenuPosition {
+            Left, Right
+        }
 
         public override void OnApplicationStart()
         {
+            var cat = MelonPreferences.CreateCategory("Button API");
+            menupos = cat.CreateEntry<MenuPosition>("Menu Position", MenuPosition.Right);
+            menuscale = cat.CreateEntry<Vector3>("Menu Scale", new Vector3(0.0007f, 0.001f, 0.001f));
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
 
             HarmonyInstance.Patch(typeof(PuppetMaster).GetMethod(nameof(PuppetMaster.AvatarInstantiated)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Pre), BindingFlags.NonPublic | BindingFlags.Static)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Post), BindingFlags.NonPublic | BindingFlags.Static)));
@@ -58,9 +64,11 @@ namespace ChilloutButtonAPI
                         OurUIParent.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
                         OurUIParent.transform.SetParent(QM);
-
-                        OurUIParent.transform.localPosition = new Vector3(0.65f, 0.062f, 0f);
-                        OurUIParent.transform.localScale = new Vector3(0.0007f, 0.001f, 0.001f);
+                        MelonLogger.Msg("Menu Position:");
+                        MelonLogger.Msg("Menu Position: {0}", (MenuPosition)menupos.BoxedValue);
+                        MelonLogger.Msg("Menu Position: {0}", menupos.BoxedValue.ToString());
+                        OurUIParent.transform.localPosition = MenuPositions[menupos.BoxedValue.ToString()];
+                        OurUIParent.transform.localScale = (Vector3)menuscale.BoxedValue;
 
                         OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP)").gameObject.SetActive(false);
                         OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP) Title").GetComponent<TextMeshProUGUI>().text = "Mod UI";
@@ -82,31 +90,31 @@ namespace ChilloutButtonAPI
 
                     HasInit = true;
 
-                    OnInit += () =>
-                    {
-                        var menu = MainPage.AddSubMenu("Test SubMenu");
+                    //OnInit += () =>
+                    //{
+                    //    var menu = MainPage.AddSubMenu("Test SubMenu");
 
-                        menu.AddButton("Test Button", "Test Button", () =>
-                        {
-                            MelonLogger.Msg("Button Clicked!");
+                    //    menu.AddButton("Test Button", "Test Button", () =>
+                    //    {
+                    //        MelonLogger.Msg("Button Clicked!");
 
-                            //CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
+                    //        //CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
 
-                            //ViewManager.Instance.openMenuKeyboard("");
-                        });
+                    //        //ViewManager.Instance.openMenuKeyboard("");
+                    //    });
 
-                        menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
-                        {
-                            MelonLogger.Msg($"Toggle Clicked! -> {v}");
-                        }, true);
+                    //    menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
+                    //    {
+                    //        MelonLogger.Msg($"Toggle Clicked! -> {v}");
+                    //    }, true);
 
-                        menu.AddSlider("Test Slider", "Test Slider", (v) =>
-                        {
-                            MelonLogger.Msg($"Slider Adjusted! -> {v}");
-                        }, 0.5f, 0f, 1f);
+                    //    menu.AddSlider("Test Slider", "Test Slider", (v) =>
+                    //    {
+                    //        MelonLogger.Msg($"Slider Adjusted! -> {v}");
+                    //    }, 0.5f, 0f, 1f);
 
-                        menu.AddLabel("Test Label", "Test Label");
-                    };
+                    //    menu.AddLabel("Test Label", "Test Label");
+                    //};
 
                     OnInit?.Invoke();
                 }
@@ -143,7 +151,7 @@ namespace ChilloutButtonAPI
             {
                 yield return new WaitForSeconds(1f);
 
-                MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"{__instance.userName} Joined" : "Local Player Init");
+                MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"\"{__instance.userName}\" ({__instance.ownerId}) Joined" : "Local Player Init");
 
                 __instance.gameObject.AddComponent<ObjectHandler>().OnDestroy_E += () =>
                 {
@@ -158,7 +166,7 @@ namespace ChilloutButtonAPI
 
         private static void OnPlayerLeft(PlayerDescriptor __instance)
         {
-            MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"{__instance.userName} Left" : "Local Player Leave");
+            MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"\"{__instance.userName}\" ({__instance.ownerId}) Left" : "Local Player Leave");
 
             OnPlayerLeave?.Invoke(__instance);
         }
