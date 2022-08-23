@@ -64,9 +64,6 @@ namespace ChilloutButtonAPI {
                         OurUIParent.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
                         OurUIParent.transform.SetParent(QM);
-                        MelonLogger.Msg("Menu Position:");
-                        MelonLogger.Msg("Menu Position: {0}", (MenuPosition)menupos.BoxedValue);
-                        MelonLogger.Msg("Menu Position: {0}", menupos.BoxedValue.ToString());
                         OurUIParent.transform.localPosition = MenuPositions[menupos.BoxedValue.ToString()];
                         OurUIParent.transform.localScale = (Vector3)menuscale.BoxedValue;
 
