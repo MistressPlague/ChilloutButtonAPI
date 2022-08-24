@@ -16,34 +16,61 @@ using AccessTools = HarmonyLib.AccessTools;
 using HarmonyMethod = HarmonyLib.HarmonyMethod;
 using Object = UnityEngine.Object;
 
-[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.9", "Plague, Bluescream")]
-[assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
+// For an example on how to use the events, check out https://github.com/Bluscream/CVR-EventLogger/blob/main/Main.cs
+// For an example on how to create a menu / button check out https://github.com/Bluscream/CVRMods/blob/patch-1/RestartButton/Main.cs#L41-L47
 
+[assembly: MelonInfo(typeof(ChilloutButtonAPI.ChilloutButtonAPIMain), "ChilloutButtonAPI", "1.8", "Plague")]
+[assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 namespace ChilloutButtonAPI {
     public class ChilloutButtonAPIMain : MelonMod
     {
         public static event Action OnInit;
-        public static readonly Dictionary<string, Vector3> MenuPositions = new Dictionary<string, Vector3>() { { "Left", new Vector3(-.725f, 0.062f, 0f) }, { "Right", new Vector3(0.65f, 0.062f, 0f) } };
-        public static MelonPreferences_Entry menupos;
-        public static MelonPreferences_Entry menuscale;
-        public enum MenuPosition {
-            Left, Right
-        }
+
+        private static GameObject OurUIParent;
+        public static SubMenu MainPage;
+        private static bool HasInit = false;
+
+        public static readonly Dictionary<string, Vector3> MenuPositions = new Dictionary<string, Vector3>() { { "Left", new Vector3(-.7f, 0.062f, 0f) }, { "Right", new Vector3(0.65f, 0.062f, 0f) } };
+        public static readonly Dictionary<string, Quaternion> MenuRotations = new Dictionary<string, Quaternion>() { { "Left", new Quaternion(0f, 0f, 0f, 0f) }, { "Right", new Quaternion(0f, 0f, 0f, 0f) } };
+        public static MelonPreferences_Entry MenuLocationSetting;
+        public static MelonPreferences_Entry MenuPositionSetting;
+        public static MelonPreferences_Entry MenuRotationSetting;
+        public static MelonPreferences_Entry MenuScaleSetting;
+        public enum MenuPosition { Left, Right }
 
         public override void OnApplicationStart()
         {
             var cat = MelonPreferences.CreateCategory("Button API");
-            menupos = cat.CreateEntry<MenuPosition>("Menu Position", MenuPosition.Right);
-            menuscale = cat.CreateEntry<Vector3>("Menu Scale", new Vector3(0.0007f, 0.001f, 0.001f));
+            MenuLocationSetting = cat.CreateEntry<MenuPosition>("menulocation", MenuPosition.Right, "Menu Location", "Presets for Position and Rotation", false, true);
+            // MenuLocationSetting.OnValueChangedUntyped += Menupos_OnValueChangedUntyped;
+            MenuPositionSetting = cat.CreateEntry<Vector3>("menuposition", MenuPositions["Right"], "Menu Position");
+            MenuRotationSetting = cat.CreateEntry<Quaternion>("menurotation", MenuRotations["Right"], "Menu Rotation");
+            MenuScaleSetting = cat.CreateEntry<Vector3>("menuscale", new Vector3(0.0007f, 0.001f, 0.001f), "Menu Scale");
+
             HarmonyInstance.Patch(AccessTools.Constructor(typeof(PlayerDescriptor)), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnPlayerJoined), BindingFlags.NonPublic | BindingFlags.Static)));
-
             HarmonyInstance.Patch(typeof(PuppetMaster).GetMethod(nameof(PuppetMaster.AvatarInstantiated)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Pre), BindingFlags.NonPublic | BindingFlags.Static)), new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnAvatarInstantiated_Post), BindingFlags.NonPublic | BindingFlags.Static)));
-
             HarmonyInstance.Patch(typeof(CVR_MenuManager).GetMethod(nameof(CVR_MenuManager.ToggleQuickMenu), AccessTools.all), null, new HarmonyMethod(typeof(ChilloutButtonAPIMain).GetMethod(nameof(OnQMStateChange), BindingFlags.NonPublic | BindingFlags.Static))); // Patch Method Setting Bool For QM Status; Use For Our UI To Sync
         }
 
-        private static GameObject OurUIParent;
-        public static SubMenu MainPage;
+        public override void OnPreferencesSaved() {
+            try {
+                var pos = MenuLocationSetting.BoxedValue.ToString();
+                MenuPositionSetting.BoxedValue = MenuPositions[pos];
+                MenuRotationSetting.BoxedValue = MenuRotations[pos];
+                // MelonPreferences.Save();
+                ApplyUISettings();
+            } catch (Exception ex) {
+                MelonLogger.Error($"Failed to set MenuLocationSetting: {ex.Message}");
+            }
+        }
+
+        private static void ApplyUISettings(bool force = false) {
+            if (force || HasInit) {
+                OurUIParent.transform.localPosition = (Vector3)MenuPositionSetting.BoxedValue;
+                OurUIParent.transform.localRotation = (Quaternion)MenuRotationSetting.BoxedValue;
+                OurUIParent.transform.localScale = (Vector3)MenuScaleSetting.BoxedValue;
+            }
+        }
 
         private static void OnQMStateChange(bool __0)
         {
@@ -64,8 +91,7 @@ namespace ChilloutButtonAPI {
                         OurUIParent.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
                         OurUIParent.transform.SetParent(QM);
-                        OurUIParent.transform.localPosition = MenuPositions[menupos.BoxedValue.ToString()];
-                        OurUIParent.transform.localScale = (Vector3)menuscale.BoxedValue;
+                        ApplyUISettings(true);
 
                         OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP)").gameObject.SetActive(false);
                         OurUIParent.transform.Find("Scroll View/Viewport/Content/Back Button/Text (TMP) Title").GetComponent<TextMeshProUGUI>().text = "Mod UI";
@@ -86,32 +112,6 @@ namespace ChilloutButtonAPI {
                     }
 
                     HasInit = true;
-
-                    //OnInit += () =>
-                    //{
-                    //    var menu = MainPage.AddSubMenu("Test SubMenu");
-
-                    //    menu.AddButton("Test Button", "Test Button", () =>
-                    //    {
-                    //        MelonLogger.Msg("Button Clicked!");
-
-                    //        //CohtmlHud.Instance.ViewDropText("Category", "Headline", "Small");
-
-                    //        //ViewManager.Instance.openMenuKeyboard("");
-                    //    });
-
-                    //    menu.AddToggle("Test Toggle", "Test Toggle", (v) =>
-                    //    {
-                    //        MelonLogger.Msg($"Toggle Clicked! -> {v}");
-                    //    }, true);
-
-                    //    menu.AddSlider("Test Slider", "Test Slider", (v) =>
-                    //    {
-                    //        MelonLogger.Msg($"Slider Adjusted! -> {v}");
-                    //    }, 0.5f, 0f, 1f);
-
-                    //    menu.AddLabel("Test Label", "Test Label");
-                    //};
 
                     OnInit?.Invoke();
                 }
@@ -138,8 +138,6 @@ namespace ChilloutButtonAPI {
             }
         }
 
-        private static bool HasInit = false;
-
         private static void OnPlayerJoined(PlayerDescriptor __instance)
         {
             MelonCoroutines.Start(RunMe());
@@ -147,9 +145,6 @@ namespace ChilloutButtonAPI {
             IEnumerator RunMe()
             {
                 yield return new WaitForSeconds(1f);
-
-                MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"\"{__instance.userName}\" ({__instance.ownerId}) Joined" : "Local Player Init");
-
                 __instance.gameObject.AddComponent<ObjectHandler>().OnDestroy_E += () =>
                 {
                     OnPlayerLeft(__instance);
@@ -163,8 +158,6 @@ namespace ChilloutButtonAPI {
 
         private static void OnPlayerLeft(PlayerDescriptor __instance)
         {
-            MelonLogger.Msg(!string.IsNullOrEmpty(__instance.userName) ? $"\"{__instance.userName}\" ({__instance.ownerId}) Left" : "Local Player Leave");
-
             OnPlayerLeave?.Invoke(__instance);
         }
 
